@@ -53,3 +53,5 @@ npm-debug.log
 android/**/*.iml
 local.properties
 *.iml
+
+.github

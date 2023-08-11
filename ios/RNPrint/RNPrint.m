@@ -28,14 +28,19 @@ RCT_EXPORT_MODULE();
     // Create printing info
     UIPrintInfo *printInfo = [UIPrintInfo printInfo];
     
-    printInfo.outputType = UIPrintInfoOutputGeneral;
+    printInfo.outputType = UIPrintInfoOutputGrayscalePhoto;
     printInfo.jobName = _jobName;
     printInfo.duplex = UIPrintInfoDuplexLongEdge;
     printInfo.orientation = _isLandscape? UIPrintInfoOrientationLandscape: UIPrintInfoOrientationPortrait;
-    
+
+    // Create print paper info
+    UIPrintPaper *printPaper = [UIPrintPaper printPaper];
+    printPaper.paperSize = CGSizeMake(175.7,283.4);
+
     printInteractionController.printInfo = printInfo;
+    printInteractionController.printPaper = printPaper;
     printInteractionController.showsPageRange = YES;
-    
+
     if (_htmlString) {
         UIMarkupTextPrintFormatter *formatter = [[UIMarkupTextPrintFormatter alloc] initWithMarkupText:_htmlString];
         printInteractionController.printFormatter = formatter;
