@@ -12,6 +12,8 @@
     return dispatch_get_main_queue();
 }
 
+@synthesize lastPrinterUsed = _lastPrinterUsed;
+
 RCT_EXPORT_MODULE();
 
 -(void)launchPrint:(NSData *) data
@@ -93,7 +95,19 @@ RCT_EXPORT_METHOD(print:(NSDictionary *)options
     
     if (options[@"printerURL"]){
         _printerURL = [NSURL URLWithString:[RCTConvert NSString:options[@"printerURL"]]];
-        _pickedPrinter = [UIPrinter printerWithURL:_printerURL];
+
+        if (self.lastPrinterUsed == nil) {
+            self.lastPrinterUsed = [[NSMutableDictionary alloc] init];
+        }
+
+        if (! [self.lastPrinterUsed objectForKey:_printerURL]) {
+            NSLog(@"[react-native-print] Printer not found in cache, adding it");
+            _pickedPrinter = [UIPrinter printerWithURL:_printerURL];
+            [self.lastPrinterUsed setObject:_pickedPrinter forKey:_printerURL];
+        } else {
+            NSLog(@"[react-native-print] Printer found in cache, using it");
+            _pickedPrinter = [self.lastPrinterUsed objectForKey:_printerURL];
+        }
     }
     
     if(options[@"isLandscape"]) {
@@ -141,7 +155,7 @@ RCT_EXPORT_METHOD(selectPrinter:(NSDictionary *)options
     void (^completionHandler)(UIPrinterPickerController *, BOOL, NSError *) =
     ^(UIPrinterPickerController *printerPicker, BOOL userDidSelect, NSError *error) {
         if (!userDidSelect && error) {
-            NSLog(@"Printing could not complete because of error: %@", error);
+            NSLog(@"[react-native-label-print] Printing could not complete because of error: %@", error);
             reject(RCTErrorUnspecified, nil, RCTErrorWithMessage(error.description));
         } else {
             [UIPrinterPickerController printerPickerControllerWithInitiallySelectedPrinter:printerPicker.selectedPrinter];
